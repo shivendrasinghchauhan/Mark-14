@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To-Do List</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f0f0f0;
+    }
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      text-align: center;
+    }
+    .input-group {
+      display: flex;
+      margin-bottom: 20px;
+    }
+    .input-group input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .input-group button {
+      padding: 10px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      margin-left: 10px;
+      cursor: pointer;
+    }
+    .input-group button:hover {
+      background-color: #218838;
+    }
+    .filters {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .filters button {
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .filters button.active {
+      background-color: #007bff;
+      color: white;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid #ccc;
+    }
+    li.completed {
+      text-decoration: line-through;
+      color: #888;
+    }
+    li button {
+      background: none;
+      border: none;
+      color: #007bff;
+      cursor: pointer;
+    }
+    li button:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>To-Do List</h1>
+    <div class="input-group">
+      <input type="text" id="taskInput" placeholder="Add a new task...">
+      <button onclick="addTask()">Add</button>
+    </div>
+    <div class="filters">
+      <button class="active" onclick="filterTasks('all')">All</button>
+      <button onclick="filterTasks('pending')">Pending</button>
+      <button onclick="filterTasks('completed')">Completed</button>
+    </div>
+    <ul id="taskList"></ul>
+  </div>
+
+  <script>
+    let tasks = [];
+    let filter = 'all';
+
+    function renderTasks() {
+      const taskList = document.getElementById('taskList');
+      taskList.innerHTML = '';
+
+      const filteredTasks = tasks.filter(task => {
+        if (filter === 'all') return true;
+        if (filter === 'pending') return !task.completed;
+        if (filter === 'completed') return task.completed;
+      });
+
+      filteredTasks.forEach((task, index) => {
+        const li = document.createElement('li');
+        li.className = task.completed ? 'completed' : '';
+
+        const taskText = document.createElement('span');
+        taskText.textContent = task.text;
+        taskText.contentEditable = true;
+        taskText.onblur = () => editTask(index, taskText.textContent);
+
+        const completeButton = document.createElement('button');
+        completeButton.textContent = task.completed ? 'Unmark' : 'Complete';
+        completeButton.onclick = () => toggleComplete(index);
+
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.onclick = () => deleteTask(index);
+
+        li.appendChild(taskText);
+        li.appendChild(completeButton);
+        li.appendChild(deleteButton);
+        taskList.appendChild(li);
+      });
+    }
+
+    function addTask() {
+      const taskInput = document.getElementById('taskInput');
+      const taskText = taskInput.value.trim();
+      if (taskText) {
+        tasks.push({ text: taskText, completed: false });
+        taskInput.value = '';
+        renderTasks();
+      }
+    }
+
+    function editTask(index, newText) {
+      tasks[index].text = newText;
+      renderTasks();
+    }
+
+    function toggleComplete(index) {
+      tasks[index].completed = !tasks[index].completed;
+      renderTasks();
+    }
+
+    function deleteTask(index) {
+      tasks.splice(index, 1);
+      renderTasks();
+    }
+
+    function filterTasks(newFilter) {
+      filter = newFilter;
+      document.querySelectorAll('.filters button').forEach(button => {
+        button.classList.remove('active');
+      });
+      document.querySelector(`.filters button[onclick="filterTasks('${newFilter}')"]`).classList.add('active');
+      renderTasks();
+    }
+
+    renderTasks();
+  </script>
+</body>
+</html>
+
